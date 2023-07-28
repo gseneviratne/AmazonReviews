@@ -22,9 +22,11 @@ import json
 #URL PAGINA GIOCHI PS4
 product_url = 'https://www.amazon.it/s?i=videogames&rh=n%3A412603031%2Cn%3A2569674031%2Cn%3A2569677031&dc&fs=true&ds=v1%3AieAKOR%2F8sJjjPGizhRciufqECbJsyeNrE9vNb36OrXY&qid=1690554748&rnid=412603031&ref=sr_nr_n_5'
 #URL PAGINA MUSICA CLASSICA
-product_url = "https://www.amazon.it/s?rh=n%3A435475031&fs=true&ref=lp_435475031_sar"
+#product_url = "https://www.amazon.it/s?rh=n%3A435475031&fs=true&ref=lp_435475031_sar"
 
-product_url = "https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/dp/B07SV8K836/ref=sr_1_7?__mk_it_IT=ÅMÅŽÕÑ&keywords=ps4&qid=1690556359&s=music&sr=1-7-catcorr"
+#product_url = "https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/dp/B07SV8K836/ref=sr_1_7?__mk_it_IT=ÅMÅŽÕÑ&keywords=ps4&qid=1690556359&s=music&sr=1-7-catcorr"
+
+product_url = "https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/product-reviews/B07SV8K836/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews"
 
 # Funzione per ottenere le recensioni del prodotto da Amazon
 def get_amazon_reviews():
@@ -34,6 +36,7 @@ def get_amazon_reviews():
 
         # Step 2: Utilizza Beautiful Soup per analizzare il codice HTML
         soup = BeautifulSoup(html_content, 'html.parser')
+        #print(soup)
 
         # Step 3: Trova tutti gli elementi delle recensioni
 
