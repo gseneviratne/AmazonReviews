@@ -1,63 +1,88 @@
-# Web Scraping delle recensioni di un prodotto su Amazon utilizzando Beautiful Soup.
+#PROGETTO TECHNOLOGIES FOR ADVANCED PROGRAMMING 
+#SCRAPER PYTHON SCRIPT - CORRADO TRGILIA X8100881
 
+#Descrizione dello script: Web Scraping delle recensioni di un prodotto su Amazon
 
-#div class="sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 sg-col s-widget-spacing-small sg-col-12-of-16"
-
-#span class="a-size-medium a-color-base a-text-normal"
-
-#span class="a-icon-alt"
-
-
-# Importa le librerie necessarie
+#Importa le librerie necessarie (come  Beautiful Soup)
 import requests
 from bs4 import BeautifulSoup
 import json
 
-# Definisci l'URL del prodotto Amazon da cui estrarre le recensioni
-#product_url = 'https://www.amazon.it/Console-Portatile-quad-core-funzione-bluetooth/dp/B0BHKMKKGD/ref=rvi_sccl_8/258-1633243-3972465?pd_rd_w=oVk1O&content-id=amzn1.sym.547ce61e-33fb-4876-9984-dcdd97a99f53&pf_rd_p=547ce61e-33fb-4876-9984-dcdd97a99f53&pf_rd_r=T1Z9VGH312NZNP01GEXA&pd_rd_wg=zCdgX&pd_rd_r=3aa3088f-6c17-457a-9cb9-a16bc63ede2e&pd_rd_i=B0BHKMKKGD&psc=1'
+#Definisco l'URL del prodotto Amazon da cui estrarre le recensioni
 
-#https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/dp/B07SV8K836/ref=sr_1_7?__mk_it_IT=ÅMÅŽÕÑ&keywords=ps4&qid=1690556359&s=music&sr=1-7-catcorr
+#KingdomCome Deliverance - not work 
 
 
-#URL PAGINA GIOCHI PS4
-product_url = 'https://www.amazon.it/s?i=videogames&rh=n%3A412603031%2Cn%3A2569674031%2Cn%3A2569677031&dc&fs=true&ds=v1%3AieAKOR%2F8sJjjPGizhRciufqECbJsyeNrE9vNb36OrXY&qid=1690554748&rnid=412603031&ref=sr_nr_n_5'
-#URL PAGINA MUSICA CLASSICA
-#product_url = "https://www.amazon.it/s?rh=n%3A435475031&fs=true&ref=lp_435475031_sar"
+#The Witcher 3 - work
 
-#product_url = "https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/dp/B07SV8K836/ref=sr_1_7?__mk_it_IT=ÅMÅŽÕÑ&keywords=ps4&qid=1690556359&s=music&sr=1-7-catcorr"
 
-product_url = "https://www.amazon.it/Kingdom-Come-Deliverance-Royal-Playstation/product-reviews/B07SV8K836/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews"
+#Kingdom Hearts 3 - work    
 
-# Funzione per ottenere le recensioni del prodotto da Amazon
+
+#One Piece New Edition (Vol 99) - work
+
+
+#QUMOX Micro SD A Memory Stick PRO Duo Adattatore per Sony PSP -work
+
+#Metodo per leggere il file di testo da me creato dove conterrà i link review che analizzeremo
+def leggi_file_e_crea_array(nome_file):
+    try:
+        with open(nome_file, 'r') as file:
+            array_links = file.read().splitlines()
+            return array_links
+    except FileNotFoundError:
+        print(f"File '{nome_file}' non trovato.")
+        return []
+
+
+#Metodo per ottenere/estrapolare le recensioni del prodotto da Amazon
 def get_amazon_reviews():
-        # Step 1: Scarica il codice HTML della pagina del prodotto
+        
+        #Leggo il codice HTML dato dall'URL in input
         response = requests.get(product_url)
         html_content = response.text
 
-        # Step 2: Utilizza Beautiful Soup per analizzare il codice HTML
+        #La libreria BeautifulSoup analizzerà il codice HTML
         soup = BeautifulSoup(html_content, 'html.parser')
-        #print(soup)
 
-        # Step 3: Trova tutti gli elementi delle recensioni
-
-        #class usata per le pagine inerenti alla lista uscita per categoria
-        divs = soup.find_all('div', {'class': 'sg-col-20-of-24 s-result-item s-asin sg-col-0-of-12 sg-col-16-of-20 sg-col s-widget-spacing-small sg-col-12-of-16'})
-
-
-
+        #Trovo il "tag div" "padre" da cui poi estrapolo i vari div figli
+        #(ovvero le recensioni ed eventuali altre informazioni)
+        divs = soup.find_all('div', {'class' : 'a-section review aok-relative'})
+        
         #Creo una lista vuota
         data = []
 
         for div in divs:
-            span = div.find("span", class_="a-size-medium a-color-base a-text-normal")
-            title = span.text if span else ''
-            print("title " , title)
-            data.append({"title": title})
+            #estrapolo la valutazione "star" dalle recensioni
+            span = div.find("span", class_="a-icon-alt")
+            star = span.text if span else ''
+            
+            #estrapolo il testo effettivo della recensione
+            span = div.find("span", class_="a-size-base review-text review-text-content")
+            review = span.text if span else ''
+
+
+            print("star: " , star)
+            print("review: " , review)
+            data.append({"star": star})
+            data.append({"review": review})
 
         with open("data.json" , "w") as file:
             json.dump(data,file)
 
 # Step 5: Esegui il codice e visualizza i risultati
 if __name__ == '__main__':
-    get_amazon_reviews()
+    nome_file = 'reviewlinkAmazon.txt'
+    array_links = leggi_file_e_crea_array(nome_file)
+    product_url = array_links[0]
+    print(product_url)
+    #get_amazon_reviews()
+
+
+
+
+
+#a-section a-spacing-none reviews-content a-size-base
+#a-section a-spacing-none review-views celwidget
+#a-section review aok-relative
 
