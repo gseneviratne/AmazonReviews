@@ -1,0 +1,25 @@
+Documentazione e guida del codice Scraper.py 
+
+Descrizione dello script: Web Scraping delle recensioni di un prodotto su Amazon
+librerie : requests,BeautifulSoup,json
+
+Legge il file di testo creato dove conterrà i link review che verranno poi analizzati
+def leggi_file_e_crea_array(nome_file)
+
+Ottiene/estrapola le recensioni del prodotto da Amazon
+def get_amazon_reviews()
+
+
+Parte di codice scartato e/o non implementato
+#a-section a-spacing-none reviews-content a-size-base
+#a-section a-spacing-none review-views celwidget
+#a-section review aok-relative
+
+#product_url = array_links[4]
+#get_amazon_reviews()
+
+""" for i in range(len(array_links)):
+        #print(array_links[i])
+        product_url = array_links[i]
+        print("PRODOTTO N* " , i)
+        get_amazon_reviews() """
