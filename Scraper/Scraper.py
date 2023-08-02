@@ -77,11 +77,11 @@ def send_review_to_server(review_text):
     server_url = "http://127.0.0.1:8081"
 
     # Dati da inviare nel corpo della richiesta POST
-    data = {"review": review_text}
+    data = review_text
 
     try:
         # Invio della richiesta POST al server
-        response = requests.post(server_url, data=data)
+        response = requests.post(server_url, data)
         response.raise_for_status()  # Genera un'eccezione se la risposta ha un codice di errore (non 2xx)
         print("Recensione inviata con successo al server.")
     except requests.exceptions.RequestException as e:
