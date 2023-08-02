@@ -7,7 +7,8 @@ import json
 import time
 
 #Creo una variabile che sarà una lista vuota
-global data
+global dataR
+
 
 def leggi_file_e_crea_array(nome_file):
     try:
@@ -53,17 +54,38 @@ def get_amazon_reviews():
             print(review)
             print("-----------------")
 
-            data.append({"utente": username})
-            data.append({"valutazione": star})
-            data.append({"data": date})
-            data.append({"recensione": review})
+            dataR.append({"utente": username})
+            dataR.append({"valutazione": star})
+            dataR.append({"data": date})
+            dataR.append({"recensione": review})
+
+            print("lastreview: " + review)
+            send_review_to_server(review)
+
+
+def send_review_to_server(review_text):
+    # URL del server a cui inviare la richiesta POST
+    server_url = "http://127.0.0.1:8081"
+
+    # Dati da inviare nel corpo della richiesta POST
+    data = {"review": review_text}
+
+    try:
+        # Invio della richiesta POST al server
+        response = requests.post(server_url, data=data)
+        response.raise_for_status()  # Genera un'eccezione se la risposta ha un codice di errore (non 2xx)
+        print("Recensione inviata con successo al server.")
+    except requests.exceptions.RequestException as e:
+        print("Errore durante l'invio della recensione al server:", str(e))
+    except Exception as e:
+        print("Errore imprevisto:", str(e))
 
 if __name__ == '__main__':
     #Definisco l'URL del prodotto Amazon da cui estrarre le recensioni direttamente dal file txt creato
     nome_file = 'reviewlinkAmazon.txt'
     array_links = leggi_file_e_crea_array(nome_file)
 
-    data = []
+    dataR = []
 
     #product_url = array_links[1]
     #get_amazon_reviews()
@@ -74,4 +96,8 @@ if __name__ == '__main__':
         get_amazon_reviews()
         time.sleep(1)  # Pausa di 1 secondo tra un elemento e l'altro
         with open("data.json" , "w") as file:
-            json.dump(data,file)
+            json.dump(dataR,file)
+
+    
+
+    
