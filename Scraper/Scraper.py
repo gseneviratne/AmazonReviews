@@ -20,15 +20,24 @@ def leggi_file_e_crea_array(nome_file):
         return []
 
 def get_amazon_reviews():
-        #Leggo il codice HTML dato dall'URL in input
-        response = requests.get(product_url) 
-        html_content = response.text
+        
 
-        #BeautifulSoup analizzerà il codice HTML
-        soup = BeautifulSoup(html_content, 'html.parser') 
+        while True:
+            #Leggo il codice HTML dato dall'URL in input
+            response = requests.get(product_url) 
+            html_content = response.text
 
-        #Trovo il "tag div" "padre" da cui poi estrapolo i vari div figli
-        divs = soup.find_all('div', {'class' : 'a-section review aok-relative'})
+            #BeautifulSoup analizzerà il codice HTML
+            soup = BeautifulSoup(html_content, 'html.parser') 
+            #Trovo il "tag div" "padre" da cui poi estrapolo i vari div figli
+            divs = soup.find_all('div', {'class' : 'a-section review aok-relative'})
+            #print(divs)
+
+             # Se la lista dei div è vuota, esco dal ciclo
+            if divs != []:
+                break
+
+
 
         for div in divs:
             #estrapolo nome,stelle e recensione
@@ -94,10 +103,6 @@ if __name__ == '__main__':
         product_url = array_links[i]
         print("PRODOTTO N* " , i)
         get_amazon_reviews()
-        time.sleep(1)  # Pausa di 1 secondo tra un elemento e l'altro
+        time.sleep(0)  # Pausa di 1 secondo tra un elemento e l'altro
         with open("data.json" , "w") as file:
             json.dump(dataR,file)
-
-    
-
-    
