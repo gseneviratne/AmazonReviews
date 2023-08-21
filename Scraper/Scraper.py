@@ -68,7 +68,7 @@ def get_amazon_reviews():
             dataR.append({"data": date})
             dataR.append({"recensione": review})
 
-            print("lastreview: " + review)
+            #print("lastreview: " + review)
             send_review_to_server(review)
 
 
@@ -78,6 +78,9 @@ def send_review_to_server(review_text):
 
     # Dati da inviare nel corpo della richiesta POST
     data = review_text
+
+    with open('onlydesc.txt', 'a',encoding='utf-8') as file:
+        file.write(review_text)
 
     try:
         # Invio della richiesta POST al server
@@ -95,7 +98,7 @@ if __name__ == '__main__':
     array_links = leggi_file_e_crea_array(nome_file)
 
     dataR = []
-
+    open('onlydesc.txt', 'w')
     #product_url = array_links[1]
     #get_amazon_reviews()
 
