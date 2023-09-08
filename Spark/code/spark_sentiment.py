@@ -111,7 +111,7 @@ total_processed = 0
 
 # Define the Elasticsearch index and mapping
 elastic_host = "http://elasticsearch:9200"
-elastic_index = "artists_songs"
+elastic_index = "reviews"
 es = Elasticsearch(hosts=elastic_host)
 
 '''
@@ -175,7 +175,7 @@ def process_batch(batch_df, batch_id):
                 .option("es.nodes", "elasticsearch") \
                 .option("es.port", "9200") \
                 .option("es.resource", elastic_index) \
-                .option("es.mapping.id", "artists_songs") \
+                .option("es.mapping.id", "reviews") \
                 .mode("append") \
                 .save()
         
