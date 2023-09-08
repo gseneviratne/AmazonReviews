@@ -34,19 +34,19 @@ def get_spark_session():
 spark = get_spark_session()
 
 #Define UDFs
-def get_polarity(lyrics):
-    blob = TextBlob(lyrics)
+def get_polarity(review):
+    blob = TextBlob(review)
     polarity = blob.sentiment.polarity
     return polarity
 
-def get_subjectivity(lyrics):
-    blob = TextBlob(lyrics)
+def get_subjectivity(review):
+    blob = TextBlob(review)
     subjectivity = blob.sentiment.subjectivity
     return subjectivity
     
 
 # Define Kafka topic and server
-topic = "lyricsFlux"
+topic = "Reviews"
 kafkaServer = "kafkaserver:9092"
 
 # Read messages from Kafka
@@ -59,10 +59,10 @@ df = spark \
     .load()
 
 schema = StructType([\
-    StructField("Country", StringType(), True),\
-    StructField("Genere", StringType(), True), \
-    StructField("artists_songs", StringType(), True),\
-    StructField("Lyrics", StringType(), True), \
+    StructField("utente", StringType(), True),\
+    StructField("valutazione", StringType(), True), \
+    StructField("data", StringType(), True),\
+    StructField("review", StringType(), True), \
 ])
     
     
@@ -70,11 +70,11 @@ schema = StructType([\
 es_mapping = {
     "mappings": {
         "properties": {
-            "Country": {"type": "keyword"},
-            "Genere": {"type": "keyword"},
+            "utente": {"type": "keyword"},
+            "valutazione": {"type": "keyword"},
             "@timestamp": {"type": "date"},
-            "artists_songs": {"type": "keyword"},
-            "Lyrics": {"type": "text"},
+            "data": {"type": "keyword"},
+            "Review": {"type": "text"},
             "polarity": {"type": "float"},
             "subjectivity": {"type": "float"},
             "prediction": {"type": "integer"}
@@ -86,7 +86,7 @@ es_mapping = {
 
 value_df = df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-exploded_df = value_df.selectExpr("value.Country", "value.Genere", "value.artists_songs", "value.Lyrics")
+exploded_df = value_df.selectExpr("value.utente", "value.valutazione", "value.data", "value.review")
 
 
 # Apply UDFs to the DataFrame
@@ -94,8 +94,8 @@ get_polarity_udf = udf(get_polarity, FloatType())
 get_subjectivity_udf = udf(get_subjectivity, FloatType())
 
 df_sentiment = exploded_df \
-    .withColumn("polarity", get_polarity_udf("Lyrics")) \
-    .withColumn("subjectivity", get_subjectivity_udf("Lyrics"))
+    .withColumn("polarity", get_polarity_udf("review")) \
+    .withColumn("subjectivity", get_subjectivity_udf("review"))
 
 # Assemble the feature into a single vector of columns
 assembler = VectorAssembler(inputCols=["polarity", "subjectivity"], outputCol="features")
