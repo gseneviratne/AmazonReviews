@@ -46,8 +46,8 @@ def get_subjectivity(review):
     
 
 # Define Kafka topic and server
-topic = "Reviews"
-kafkaServer = "kafkaserver:9092"
+topic = "reviews"
+kafkaServer = "kafkaServer:9092"
 
 # Read messages from Kafka
 df = spark \
@@ -114,7 +114,7 @@ elastic_host = "http://elasticsearch:9200"
 elastic_index = "reviews"
 es = Elasticsearch(hosts=elastic_host)
 
-'''
+
 response = es.indices.create(
     index=elastic_index,
     body=es_mapping,
@@ -124,7 +124,7 @@ response = es.indices.create(
 if 'acknowledged' in response:
     if response['acknowledged'] == True:
         print ("INDEX MAPPING SUCCESS FOR INDEX:", response['index'])
-'''
+
 
 sem = False
 kmeans = KMeans().setK(3).setSeed(42)

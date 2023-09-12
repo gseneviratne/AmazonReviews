@@ -74,7 +74,7 @@ def get_amazon_reviews():
 
 def send_review_to_server(review_text):
     # URL del server a cui inviare la richiesta POST
-    server_url = "http://logstash:8081"
+    server_url = "http://logstash:8080"
 
     # Dati da inviare nel corpo della richiesta POST
     data = review_text
