@@ -62,7 +62,7 @@ schema = StructType([\
     StructField("utente", StringType(), True),\
     StructField("valutazione", StringType(), True), \
     StructField("data", StringType(), True),\
-    StructField("review", StringType(), True), \
+    StructField("recensione", StringType(), True), \
 ])
     
     
@@ -70,11 +70,11 @@ schema = StructType([\
 es_mapping = {
     "mappings": {
         "properties": {
-            "utente": {"type": "keyword"},
-            "valutazione": {"type": "keyword"},
+            "utente": {"type": "text"},
+            "valutazione": {"type": "integer"},
             "@timestamp": {"type": "date"},
-            "data": {"type": "keyword"},
-            "Review": {"type": "text"},
+            "data": {"type": "text"},
+            "recensione": {"type": "text"},
             "polarity": {"type": "float"},
             "subjectivity": {"type": "float"},
             "prediction": {"type": "integer"}
@@ -86,7 +86,7 @@ es_mapping = {
 
 value_df = df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-exploded_df = value_df.selectExpr("value.utente", "value.valutazione", "value.data", "value.review")
+exploded_df = value_df.selectExpr("value.utente", "value.valutazione", "value.data", "value.recensione")
 
 
 # Apply UDFs to the DataFrame
@@ -94,8 +94,8 @@ get_polarity_udf = udf(get_polarity, FloatType())
 get_subjectivity_udf = udf(get_subjectivity, FloatType())
 
 df_sentiment = exploded_df \
-    .withColumn("polarity", get_polarity_udf("review")) \
-    .withColumn("subjectivity", get_subjectivity_udf("review"))
+    .withColumn("polarity", get_polarity_udf("recensione")) \
+    .withColumn("subjectivity", get_subjectivity_udf("recensione"))
 
 # Assemble the feature into a single vector of columns
 assembler = VectorAssembler(inputCols=["polarity", "subjectivity"], outputCol="features")
@@ -143,7 +143,7 @@ def process_batch(batch_df, batch_id):
     # Increment message counter
     message_counter += batch_df.count()
     # Define the threshold of messages after which the model is trained, higher value will give better results but will take longer
-    threshold = 30
+    threshold = 5
 
     # Check if the DataFrame size is more than 5 messages
     if message_counter > threshold:
@@ -175,7 +175,7 @@ def process_batch(batch_df, batch_id):
                 .option("es.nodes", "elasticsearch") \
                 .option("es.port", "9200") \
                 .option("es.resource", elastic_index) \
-                .option("es.mapping.id", "reviews") \
+                .option("es.mapping.id", "utente") \
                 .mode("append") \
                 .save()
         

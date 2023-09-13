@@ -5,9 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import time
-
-#Creo una variabile che sarà una lista vuota
-global dataR
+import socket
 
 
 def leggi_file_e_crea_array(nome_file):
@@ -63,42 +61,42 @@ def get_amazon_reviews():
             print(review)
             print("-----------------")
 
-            dataR.append({"utente": username})
-            dataR.append({"valutazione": star})
-            dataR.append({"data": date})
-            dataR.append({"recensione": review})
+            recensione_dict = {
+                "utente": username,
+                "valutazione": num_stelle,
+                "data": date,
+                "recensione": review
+            }
+
+            recensione_json = json.dumps(recensione_dict)
 
             #print("lastreview: " + review)
-            send_review_to_server(review)
+            send_review_to_server(recensione_json)
 
 
-def send_review_to_server(review_text):
-    # URL del server a cui inviare la richiesta POST
-    server_url = "http://logstash:8080"
-
-    # Dati da inviare nel corpo della richiesta POST
-    data = review_text
-
-    with open('onlydesc.txt', 'a',encoding='utf-8') as file:
-        file.write(review_text)
-
-    try:
-        # Invio della richiesta POST al server
-        response = requests.post(server_url, data)
-        response.raise_for_status()  # Genera un'eccezione se la risposta ha un codice di errore (non 2xx)
-        print("Recensione inviata con successo al server.")
-    except requests.exceptions.RequestException as e:
-        print("Errore durante l'invio della recensione al server:", str(e))
-    except Exception as e:
-        print("Errore imprevisto:", str(e))
+def send_review_to_server(data):
+    # URL del server a cui inviare 
+    connected = False
+    while not connected:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect(("logstash", 5002))
+                # Invio del JSON a Logstash
+                s.sendall(data.encode('utf-8'))
+                # Chiudere la connessione
+                s.close()
+                print("Json inviato")
+                connected = True
+        except requests.exceptions.RequestException as e:
+            print("Errore durante l'invio della recensione al server:", str(e))
+        except Exception as e:
+            print("Errore imprevisto:", str(e))
 
 if __name__ == '__main__':
     #Definisco l'URL del prodotto Amazon da cui estrarre le recensioni direttamente dal file txt creato
     nome_file = 'reviewlinkAmazon.txt'
     array_links = leggi_file_e_crea_array(nome_file)
 
-    dataR = []
-    open('onlydesc.txt', 'w')
     #product_url = array_links[1]
     #get_amazon_reviews()
 
@@ -107,5 +105,3 @@ if __name__ == '__main__':
         print("PRODOTTO N* " , i)
         get_amazon_reviews()
         time.sleep(0)  # Pausa di 1 secondo tra un elemento e l'altro
-        with open("data.json" , "w") as file:
-            json.dump(dataR,file)
