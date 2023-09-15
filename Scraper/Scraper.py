@@ -18,7 +18,6 @@ def leggi_file_e_crea_array(nome_file):
         return []
 
 def get_amazon_reviews():
-        
 
         while True:
             #Leggo il codice HTML dato dall'URL in input
@@ -56,6 +55,7 @@ def get_amazon_reviews():
             num_stelle = star.split(',')[0]
             print("Recensione-------")
             print(username)
+            print(product)
             print("⭐" * int(num_stelle))
             print(date)
             print(review)
@@ -65,7 +65,7 @@ def get_amazon_reviews():
                 "utente": username,
                 "valutazione": num_stelle,
                 "data": date,
-                "recensione": review
+                "recensione": review.strip()
             }
 
             recensione_json = json.dumps(recensione_dict)
