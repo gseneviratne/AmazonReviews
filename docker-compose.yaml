@@ -56,19 +56,19 @@ services:
         - kafkaserver
   
   #--- Kafka topic DetectedReviews---
-  kafkaTopic2:
-    image: tap:kafka
-    container_name: kafkaTopic2
-    environment:
-        - KAFKA_ACTION=create-topic
-        - KAFKA_PARTITION=2
-        - KAFKA_TOPIC=detectedreviews
-    networks: 
-        tap:
-    depends_on:
-        - zookeeper
-        - kafkaserver
-        - spark_processing
+  #kafkaTopic2:
+  #  image: tap:kafka
+  #  container_name: kafkaTopic2
+  #  environment:
+  #      - KAFKA_ACTION=create-topic
+  #      - KAFKA_PARTITION=2
+  #      - KAFKA_TOPIC=detectedreviews
+  #  networks: 
+  #      tap:
+  #  depends_on:
+  #      - zookeeper
+  #      - kafkaserver
+  #      - spark_processing
 
   #--- Logstash ---
   logstash:
@@ -150,16 +150,16 @@ services:
     #command: python3 /app/coreradio_scraper.py
 
   #--- Reviews DetectAI ---
-  reviews_detectai:
-    image: tap:detectai
-    container_name: detectai
-    networks:
-      - tap
-    #volumes:
-    #  - ./data_ingestion/scrapers/coreradio_scraper:/app
-    depends_on:
-      - kafkaserver
-    #command: python3 /app/coreradio_scraper.py
+  #reviews_detectai:
+  #  image: tap:detectai
+  #  container_name: detectai
+  #  networks:
+  #    - tap
+  #  #volumes:
+  #  #  - ./data_ingestion/scrapers/coreradio_scraper:/app
+  #  depends_on:
+  #    - kafkaserver
+  #  #command: python3 /app/coreradio_scraper.py
 
   #--- ElasticSearch ---
   elasticsearch:
