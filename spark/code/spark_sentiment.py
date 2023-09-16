@@ -46,7 +46,7 @@ def get_subjectivity(review):
     
 
 # Define Kafka topic and server
-topic = "reviews"
+topic = "detectedreviews"
 kafkaServer = "kafkaServer:9092"
 
 # Read messages from Kafka
@@ -63,6 +63,7 @@ schema = StructType([\
     StructField("valutazione", StringType(), True), \
     StructField("data", StringType(), True),\
     StructField("recensione", StringType(), True), \
+    StructField("perplexity_per_line", StringType(), True), \
 ])
     
     
@@ -75,6 +76,7 @@ es_mapping = {
             "@timestamp": {"type": "date"},
             "data": {"type": "text"},
             "recensione": {"type": "text"},
+            "perplexity_per_line": {"type": "float"},
             "polarity": {"type": "float"},
             "subjectivity": {"type": "float"},
             "prediction": {"type": "integer"}
@@ -86,7 +88,7 @@ es_mapping = {
 
 value_df = df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-exploded_df = value_df.selectExpr("value.utente", "value.valutazione", "value.data", "value.recensione")
+exploded_df = value_df.selectExpr("value.utente", "value.valutazione", "value.data", "value.recensione", "value.perplexity_per_line")
 
 
 # Apply UDFs to the DataFrame

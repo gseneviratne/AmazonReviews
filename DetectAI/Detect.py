@@ -1,59 +1,36 @@
 from model import GPT2PPL
-from confluent_kafka import Consumer, Producer
-import json
 model = GPT2PPL()
 
-# Configurazione del consumatore Kafka
-consumer_config = {
-    'bootstrap.servers': 'kafkaServer:9092',  # Indirizzo del broker Kafka
-    'group.id': 'my-group',  # Gruppo di consumatori
-    'auto.offset.reset': 'earliest'  # Inizio dalla prima posizione disponibile nel topic
-}
+#Funzione che legge il file onlydesc.txt riga per riga
+def separate_operations(file_path):
+    operazioni = []
+    current_operation = ""
 
-# Configurazione del produttore Kafka
-producer_config = {
-    'bootstrap.servers': 'kafkaServer:9092'  # Indirizzo del broker Kafka
-}
+    with open(file_path, 'r',encoding='utf-8') as file:
+        lines = file.readlines()
 
-# Crea un produttore Kafka
-producer = Producer(producer_config)
-
-while True:
-    # Leggi un messaggio dalla coda Kafka
-    msg = consumer.poll(1.0)
-
-    if msg is None:
-        continue
-    if msg.error():
-        if msg.error().code() == KafkaError._PARTITION_EOF:
-            print('Reached end of partition')
+    for line in lines:
+        if line.strip():
+            current_operation += line
         else:
-            print('Error: %s' % msg.error())
-    else:
-        # Estrai il campo "recensione" dal messaggio JSON
-        try:
-            review = json.loads(msg.value())["recensione"]
-        except json.JSONDecodeError as e:
-            print(f"Errore durante il parsing del JSON: {e}")
-            continue
+            if current_operation:
+                operazioni.append(current_operation.strip())
+                current_operation = ""
 
-        model(reviews)
+    if current_operation:
+        operazioni.append(current_operation.strip())
 
-        # Esegui le operazioni desiderate sui dati (aggiungi campo1 e campo2)
-        processed_data = {
-            "recensione": review,
-            "campo1": "valore1",
-            "campo2": "valore2"
-        }
+    return operazioni
 
-        # Invia il messaggio elaborato al topic "detectedreviews"
-        producer.produce("detectedreviews", key=msg.key(), value=json.dumps(processed_data))
+# Percorso relativo al file onlydesc.txt in Scraper folder
+file_path = '../Scraper/onlydesc.txt'
+result = separate_operations(file_path)
 
-        # Attendere finché il messaggio viene inviato con successo
-        producer.flush()
-
-# Chiudi il consumatore Kafka in modo sicuro alla fine
-consumer.close()
+#Inserire qui, le varie descrizioni/recensioni date dallo scraper
+for operation in result:
+    #if len(operation) >= 100:
+    print(operation)
+    sentence = operation
+    model(sentence)
 
     
-

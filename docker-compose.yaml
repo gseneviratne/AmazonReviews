@@ -56,19 +56,19 @@ services:
         - kafkaserver
   
   #--- Kafka topic DetectedReviews---
-  #kafkaTopic2:
-  #  image: tap:kafka
-  #  container_name: kafkaTopic2
-  #  environment:
-  #      - KAFKA_ACTION=create-topic
-  #      - KAFKA_PARTITION=2
-  #      - KAFKA_TOPIC=detectedreviews
-  #  networks: 
-  #      tap:
-  #  depends_on:
-  #      - zookeeper
-  #      - kafkaserver
-  #      - spark_processing
+  kafkaTopic2:
+    image: tap:kafka
+    container_name: kafkaTopic2
+    environment:
+        - KAFKA_ACTION=create-topic
+        - KAFKA_PARTITION=2
+        - KAFKA_TOPIC=detectedreviews
+    networks: 
+        tap:
+    depends_on:
+        - zookeeper
+        - kafkaserver
+        - spark_processing
 
   #--- Logstash ---
   logstash:
@@ -93,28 +93,6 @@ services:
     ports:
       - "5002:5002"
     
-  #--- Spark ---
-  #spark:
-  #  image: tap:spark
-  #  container_name: spark
-  #  environment:
-  #    - SPARK_ACTION=bash
-  #    - SPARK_MASTER_URL=spark://spark-master:7077
-  #    - SPARK_DEPLOY_MODE=client
-  #    - SPARK_APPLICATION_PYTHON_FILES=/opt/spark-app/spark_code.py
-  #  volumes:
-  #    - ./spark/code:/opt/spark-app
-  #  deploy:
-  #    resources:
-  #      limits:
-  #        cpus: '4.0'
-  #        memory: 3g
-  #  networks:
-  #    - tap
-  #  depends_on:
-  #    - kafkaserver
-  #  command: spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.elasticsearch:elasticsearch-spark-30_2.12:8.2.0 --master local[*] /opt/spark-app/spark_code.py
-
   #--- Spark processing ---  
   spark_processing:
     image: tap:spark
@@ -143,23 +121,17 @@ services:
     container_name: scraper
     networks:
       - tap
-    #volumes:
-    #  - ./data_ingestion/scrapers/coreradio_scraper:/app
     depends_on:
       - logstash
-    #command: python3 /app/coreradio_scraper.py
 
   #--- Reviews DetectAI ---
-  #reviews_detectai:
-  #  image: tap:detectai
-  #  container_name: detectai
-  #  networks:
-  #    - tap
-  #  #volumes:
-  #  #  - ./data_ingestion/scrapers/coreradio_scraper:/app
-  #  depends_on:
-  #    - kafkaserver
-  #  #command: python3 /app/coreradio_scraper.py
+  reviews_detectai:
+    image: tap:detectai
+    container_name: detectai
+    networks:
+      - tap
+    depends_on:
+      - kafkaserver
 
   #--- ElasticSearch ---
   elasticsearch:

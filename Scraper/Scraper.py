@@ -28,7 +28,7 @@ def get_amazon_reviews():
             soup = BeautifulSoup(html_content, 'html.parser') 
             #Trovo il "tag div" "padre" da cui poi estrapolo i vari div figli
             divs = soup.find_all('div', {'class' : 'a-section review aok-relative'})
-            #print(divs)
+            print(divs)
 
              # Se la lista dei div è vuota, esco dal ciclo
             if divs != []:
@@ -55,7 +55,6 @@ def get_amazon_reviews():
             num_stelle = star.split(',')[0]
             print("Recensione-------")
             print(username)
-            print(product)
             print("⭐" * int(num_stelle))
             print(date)
             print(review)
