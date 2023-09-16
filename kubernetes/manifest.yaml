@@ -1,3 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amazonreviews
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,7 +32,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: kafka-zookeeper-service
+  name: kafka-zookeeper
 spec:
   selector:
     app: kafka-zookeeper
@@ -65,10 +70,11 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: kafka-service
+  name: kafka-server
 spec:
   selector:
     app: kafka-server
+  clusterIP: 10.106.138.28
   ports:
     - protocol: TCP
       port: 9092
@@ -106,7 +112,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: kafka-ui-service
+  name: kafka-ui
 spec:
   selector:
     app: kafka-ui
@@ -196,7 +202,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: logstash-service
+  name: logstash
 spec:
   selector:
     app: logstash
@@ -234,14 +240,14 @@ spec:
               value: client
             - name: SPARK_APPLICATION_PYTHON_FILES
               value: /opt/spark-app/spark_sentiment.py
-              command:
-              - spark-submit
-              args:
-              - "--packages"
-              - "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.elasticsearch:elasticsearch-spark-30_2.12:8.2.0"
-              - "--master"
-              - "local[*]"
-              - "/opt/spark-app/spark_sentiment.py"
+          command:
+            - spark-submit
+          args:
+            - "--packages"
+            - "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.elasticsearch:elasticsearch-spark-30_2.12:8.2.0"
+            - "--master"
+            - "local[*]"
+            - "/opt/spark-app/spark_sentiment.py"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -306,32 +312,34 @@ spec:
             - name: node.name
               value: elasticsearch
             - name: xpack.security.enabled
-              value: false
+              value: "false"
             - name: discovery.type
               value: single-node
             - name: bootstrap.memory_lock
-              value: true
+              value: "true"
             - name: ES_JAVA_OPTS
-              value: "Xms512m -Xmx512m"
+              value: "-Xms512m -Xmx512m"
             - name: cluster.routing.allocation.disk.threshold_enabled
-              value: false
+              value: "false"
           ports:
             - containerPort: 9200
-            - apiPort: 9300
+            - containerPort: 9300
 ---
 apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: elasticsearch-service
+  name: elasticsearch
 spec:
   selector:
     app: elasticsearch
   ports:
     - protocol: TCP
+      name: api
       port: 9200
       targetPort: 9200
     - protocol: TCP
+      name: management
       port: 9300
       targetPort: 9300
   type: ClusterIP
@@ -359,7 +367,7 @@ spec:
             - name: KBN_PATH_CONF
               value: /usr/share/kibana/config
             - name: xpack.security.enabled
-              value: false
+              value: "false"
           ports:
             - containerPort: 5601
 ---
@@ -367,7 +375,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: amazonreviews
-  name: kibana-service
+  name: kibana
 spec:
   selector:
     app: kibana

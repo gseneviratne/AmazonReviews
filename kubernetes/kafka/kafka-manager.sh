@@ -1,6 +1,6 @@
 #!/bin/bash
 ZK_DATA_DIR=/tmp/zookeeper
-ZK_SERVER="localhost"
+ZK_SERVER="kafka-zookeper"
 EXTRA_KAFKA_GROUP_ID=""
 
 [[ -z "${KAFKA_ACTION}" ]] && { echo "KAFKA_ACTION required"; exit 1; }
@@ -23,13 +23,13 @@ case ${KAFKA_ACTION} in
     kafka-server-start.sh ${KAFKA_DIR}/config/${KAFKA_CONFIG}
     ;;
     "create-topic")
-    kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions ${KAFKA_PARTITION} --topic ${KAFKA_TOPIC}
+    kafka-topics.sh --create --bootstrap-server kafka-server:9092 --replication-factor 1 --partitions ${KAFKA_PARTITION} --topic ${KAFKA_TOPIC}
     ;;
     "producer")
-    kafka-console-producer.sh --broker-list kafka:9092 --topic ${KAFKA_TOPIC}
+    kafka-console-producer.sh --broker-list kafka-server:9092 --topic ${KAFKA_TOPIC}
     ;;
     "consumer")
-    kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic ${KAFKA_TOPIC} --from-beginning ${KAFKA_CONSUMER_PROPERTIES} ${EXTRA_KAFKA_GROUP_ID}
+    kafka-console-consumer.sh --bootstrap-server kafka-server:9092 --topic ${KAFKA_TOPIC} --from-beginning ${KAFKA_CONSUMER_PROPERTIES} ${EXTRA_KAFKA_GROUP_ID}
     ;;
     "connect-standalone")
     cd ${KAFKA_DIR}
@@ -40,7 +40,7 @@ case ${KAFKA_ACTION} in
     ;;
     "run-class")
     cd ${KAFKA_DIR}
-    kafka-run-class.sh ${KAFKA_DIR}/${KAFKA_CLASS} --bootstrap-server kafka:9092 --zookeeper zookeeper:2181 --broker-list kafka:9092 
+    kafka-run-class.sh ${KAFKA_DIR}/${KAFKA_CLASS} --bootstrap-server kafka-server:9092 --zookeeper kafka-zookeeper:2181 --broker-list kafka-server:9092 
     ;;
 esac
 
