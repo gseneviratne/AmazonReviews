@@ -21,20 +21,24 @@ def get_amazon_reviews():
 
         while True:
             #Leggo il codice HTML dato dall'URL in input
-            response = requests.get(product_url) 
+            try:
+                response = requests.get(product_url) 
+            except:
+                break
             html_content = response.text
 
             #BeautifulSoup analizzerà il codice HTML
             soup = BeautifulSoup(html_content, 'html.parser') 
             #Trovo il "tag div" "padre" da cui poi estrapolo i vari div figli
             divs = soup.find_all('div', {'class' : 'a-section review aok-relative'})
-            print(divs)
+            #print(divs)
 
-             # Se la lista dei div è vuota, esco dal ciclo
+             # Se la lista dei div non è vuota, esco dal ciclo
             if divs != []:
                 break
 
-
+        if divs == []:
+            return
 
         for div in divs:
             #estrapolo nome,stelle e recensione
