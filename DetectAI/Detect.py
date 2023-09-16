@@ -23,7 +23,7 @@ def separate_operations(file_path):
     return operazioni
 
 # Percorso relativo al file onlydesc.txt in Scraper folder
-file_path = '../Scraper/onlydesc.txt'
+file_path = 'onlydesc.txt'
 result = separate_operations(file_path)
 
 #Inserire qui, le varie descrizioni/recensioni date dallo scraper
