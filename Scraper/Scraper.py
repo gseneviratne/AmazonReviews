@@ -19,6 +19,7 @@ def leggi_file_e_crea_array(nome_file):
 
 def get_amazon_reviews():
 
+        divs = []
         while True:
             #Leggo il codice HTML dato dall'URL in input
             try:

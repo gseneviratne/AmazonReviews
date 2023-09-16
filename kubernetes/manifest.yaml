@@ -1,0 +1,378 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kafka-zookeeper-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-zookeeper
+  template:
+    metadata:
+      labels:
+        app: kafka-zookeeper
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kafka-zookeeper
+          image: tap:kafka
+          env:
+            - name: KAFKA_ACTION
+              value: start-zk
+          ports:
+            - containerPort: 2181
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: kafka-zookeeper-service
+spec:
+  selector:
+    app: kafka-zookeeper
+  ports:
+    - protocol: TCP
+      port: 2181
+      targetPort: 2181
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kafka-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-server
+  template:
+    metadata:
+      labels:
+        app: kafka-server
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kafka-server
+          image: tap:kafka
+          env:
+            - name: KAFKA_ACTION
+              value: start-kafka
+          ports:
+            - containerPort: 9092
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: kafka-service
+spec:
+  selector:
+    app: kafka-server
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kafka-ui-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-ui
+  template:
+    metadata:
+      labels:
+        app: kafka-ui
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kafka-ui
+          image: provectuslabs/kafka-ui:v0.7.0
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: local
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: kafka-server:9092
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: kafka-ui-service
+spec:
+  selector:
+    app: kafka-ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kafka-reviews-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-reviews
+  template:
+    metadata:
+      labels:
+        app: kafka-reviews
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kafka-reviews
+          image: tap:kafka
+          env:
+            - name: KAFKA_ACTION
+              value: create-topic
+            - name: KAFKA_PARTITION
+              value: "2"
+            - name: KAFKA_TOPIC
+              value: reviews
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kafka-detectedreviews-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-detectedreviews
+  template:
+    metadata:
+      labels:
+        app: kafka-detectedreviews
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kafka-detectedreviews
+          image: tap:kafka
+          env:
+            - name: KAFKA_ACTION
+              value: create-topic
+            - name: KAFKA_PARTITION
+              value: "2"
+            - name: KAFKA_TOPIC
+              value: detectedreviews
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: logstash-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: logstash
+          image: tap:logstash
+          ports:
+            - containerPort: 5002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: logstash-service
+spec:
+  selector:
+    app: logstash
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: spark-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark
+  template:
+    metadata:
+      labels:
+        app: spark
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: spark
+          image: tap:spark
+          env:
+            - name: SPARK_ACTION
+              value: bash
+            - name: SPARK_MASTER_URL
+              value: spark://spark-master:7077
+            - name: SPARK_DEPLOY_MODE
+              value: client
+            - name: SPARK_APPLICATION_PYTHON_FILES
+              value: /opt/spark-app/spark_sentiment.py
+              command:
+              - spark-submit
+              args:
+              - "--packages"
+              - "org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2,org.elasticsearch:elasticsearch-spark-30_2.12:8.2.0"
+              - "--master"
+              - "local[*]"
+              - "/opt/spark-app/spark_sentiment.py"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: scraper-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scraper
+  template:
+    metadata:
+      labels:
+        app: scraper
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: scraper
+          image: tap:scraper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: detectai-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: detectai
+  template:
+    metadata:
+      labels:
+        app: detectai
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: detectai
+          image: tap:detectai
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: elasticsearch-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.2.0
+          env:
+            - name: node.name
+              value: elasticsearch
+            - name: xpack.security.enabled
+              value: false
+            - name: discovery.type
+              value: single-node
+            - name: bootstrap.memory_lock
+              value: true
+            - name: ES_JAVA_OPTS
+              value: "Xms512m -Xmx512m"
+            - name: cluster.routing.allocation.disk.threshold_enabled
+              value: false
+          ports:
+            - containerPort: 9200
+            - apiPort: 9300
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: elasticsearch-service
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+    - protocol: TCP
+      port: 9200
+      targetPort: 9200
+    - protocol: TCP
+      port: 9300
+      targetPort: 9300
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: amazonreviews
+  name: kibana-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:8.2.0
+          env:
+            - name: KBN_PATH_CONF
+              value: /usr/share/kibana/config
+            - name: xpack.security.enabled
+              value: false
+          ports:
+            - containerPort: 5601
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: amazonreviews
+  name: kibana-service
+spec:
+  selector:
+    app: kibana
+  ports:
+    - protocol: TCP
+      port: 5601
+      targetPort: 5601
+  type: ClusterIP
