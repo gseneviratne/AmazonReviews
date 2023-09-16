@@ -98,9 +98,9 @@ if __name__ == '__main__':
 
     #product_url = array_links[1]
     #get_amazon_reviews()
-
-    for i in range(len(array_links)):
-        product_url = array_links[i]
-        print("PRODOTTO N* " , i)
-        get_amazon_reviews()
-        time.sleep(0)  # Pausa di 1 secondo tra un elemento e l'altro
+    while True:
+        for i in range(len(array_links)):
+            product_url = array_links[i]
+            print("PRODOTTO N* " , i)
+            get_amazon_reviews()
+            time.sleep(0)  # Pausa di 1 secondo tra un elemento e l'altro
