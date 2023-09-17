@@ -47,7 +47,7 @@ def get_subjectivity(review):
 
 # Define Kafka topic and server
 topic = "detectedreviews"
-kafkaServer = "kafkaServer:9092"
+kafkaServer = "kafka-server:9092"
 
 # Read messages from Kafka
 df = spark \

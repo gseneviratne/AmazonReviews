@@ -23,7 +23,7 @@ RUN python3 -m spacy download en_core_web_sm
 
 RUN ln -s /opt/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION} ${SPARK_DIR}
 
-ADD code /opt/tap/code
+ADD code /opt/spark-app
 
 WORKDIR ${SPARK_DIR}
 

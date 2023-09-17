@@ -3,49 +3,31 @@ kind: Namespace
 metadata:
   name: amazonreviews
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: amazonreviews
-  name: kafka-zookeeper-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: kafka-zookeeper
-  template:
-    metadata:
-      labels:
-        app: kafka-zookeeper
-    spec:
-      restartPolicy: Always
-      containers:
-        - name: kafka-zookeeper
-          image: tap:kafka
-          env:
-            - name: KAFKA_ACTION
-              value: start-zk
-          ports:
-            - containerPort: 2181
----
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    app: kafka-server
+  name: kafka-server
   namespace: amazonreviews
-  name: kafka-zookeeper
 spec:
-  selector:
-    app: kafka-zookeeper
   ports:
-    - protocol: TCP
-      port: 2181
-      targetPort: 2181
+   - name: kafka-port
+     port: 9092
+     protocol: TCP
+     targetPort: 9092
+  selector:
+    app: kafka-server
+  clusterIP: None
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    app: kafka-server
+  name: kafka-server
   namespace: amazonreviews
-  name: kafka-server-deployment
 spec:
   replicas: 1
   selector:
@@ -56,36 +38,72 @@ spec:
       labels:
         app: kafka-server
     spec:
-      restartPolicy: Always
       containers:
-        - name: kafka-server
-          image: tap:kafka
-          env:
-            - name: KAFKA_ACTION
-              value: start-kafka
-          ports:
-            - containerPort: 9092
+      - env:
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: zookeeper-service:2181
+        - name: KAFKA_LISTENERS
+          value: LISTENER_INTERNAL://kafka-server:9092,LISTENER_EXTERNAL://localhost:9093
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: LISTENER_INTERNAL://kafka-server:9092,LISTENER_EXTERNAL://localhost:9093
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: LISTENER_INTERNAL:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: LISTENER_INTERNAL
+        image: wurstmeister/kafka
+        imagePullPolicy: IfNotPresent
+        name: kafka-server
+        ports:
+        - containerPort: 9092
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    app: zookeeper-service
+  name: zookeeper-service
   namespace: amazonreviews
-  name: kafka-server
 spec:
-  selector:
-    app: kafka-server
-  clusterIP: 10.106.138.28
+  type: NodePort
   ports:
-    - protocol: TCP
-      port: 9092
-      targetPort: 9092
-  type: ClusterIP
+    - name: zookeeper-port
+      port: 2181
+      nodePort: 30181
+      targetPort: 2181
+  selector:
+    app: zookeeper-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zookeeper-service
+  name: zookeeper-service
+  namespace: amazonreviews
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper-service
+  template:
+    metadata:
+      labels:
+        app: zookeeper-service
+    spec:
+      containers:
+        - image: wurstmeister/zookeeper
+          imagePullPolicy: IfNotPresent
+          name: zookeeper-service
+          ports:
+            - containerPort: 2181
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: kafka-ui-deployment
+  name: kafka-ui
 spec:
   replicas: 1
   selector:
@@ -126,7 +144,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: kafka-reviews-deployment
+  name: kafka-reviews
 spec:
   replicas: 1
   selector:
@@ -137,7 +155,6 @@ spec:
       labels:
         app: kafka-reviews
     spec:
-      restartPolicy: Always
       containers:
         - name: kafka-reviews
           image: tap:kafka
@@ -153,7 +170,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: kafka-detectedreviews-deployment
+  name: kafka-detectedreviews
 spec:
   replicas: 1
   selector:
@@ -164,7 +181,6 @@ spec:
       labels:
         app: kafka-detectedreviews
     spec:
-      restartPolicy: Always
       containers:
         - name: kafka-detectedreviews
           image: tap:kafka
@@ -180,7 +196,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: logstash-deployment
+  name: logstash
 spec:
   replicas: 1
   selector:
@@ -216,7 +232,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: spark-deployment
+  name: spark
 spec:
   replicas: 1
   selector:
@@ -253,7 +269,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: scraper-deployment
+  name: scraper
 spec:
   replicas: 2
   selector:
@@ -273,7 +289,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: detectai-deployment
+  name: detectai
 spec:
   replicas: 1
   selector:
@@ -293,7 +309,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: elasticsearch-deployment
+  name: elasticsearch
 spec:
   replicas: 1
   selector:
@@ -348,7 +364,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: amazonreviews
-  name: kibana-deployment
+  name: kibana
 spec:
   replicas: 1
   selector:

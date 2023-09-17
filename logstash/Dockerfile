@@ -1,4 +1,5 @@
 FROM docker.elastic.co/logstash/logstash:8.7.0
+ADD ./pipeline/reviews.conf /usr/share/logstash/pipeline/logstash.conf
 
 # Add your logstash plugins setup here
 RUN logstash-plugin install logstash-filter-sentimentalizer

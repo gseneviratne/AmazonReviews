@@ -14,7 +14,7 @@ services:
   #--- Kafka ---
   kafkaserver:
     image: tap:kafka
-    container_name: kafkaServer
+    container_name: kafka-server
     environment:
       - KAFKA_ACTION=start-kafka
       #- KAFKA_HEAP_OPTS=-Xmx256M
@@ -33,7 +33,7 @@ services:
     container_name: kafkaWebUI
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafkaServer:9092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-server:9092
     ports: 
       - 8081:8080
     networks: 
