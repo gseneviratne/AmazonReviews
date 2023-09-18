@@ -1,3 +1,7 @@
+#Questo codice Python utilizza Apache Spark per processare
+#lo streaming di dati da un server Kafka, eseguire l'analisi del sentiment
+#sulle recensioni e memorizzare i risultati in Elasticsearch
+
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, from_json, col, lit
@@ -7,6 +11,8 @@ from pyspark.ml.clustering import KMeans
 import spacy
 from elasticsearch import Elasticsearch
 import json
+
+#Utilizziamo TextBlob come Libreria per l'analisi del sentiment.
 from textblob import TextBlob
 from datetime import datetime
 
