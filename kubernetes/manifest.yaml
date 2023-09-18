@@ -400,3 +400,23 @@ spec:
       port: 5601
       targetPort: 5601
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: amazonaiwatchdogs-ingress-kibana
+  namespace: amazonreviews
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: amazonaiwatchdogs.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
